@@ -1,0 +1,12 @@
+{
+    "units": {
+        "bangbang":
+        {
+            "baseUnit": "_COMBAT Missile"
+        },
+        "COMBAT Unit First Mod Character":
+        {
+            "baseUnit": "_COMBAT Missile"
+        }
+    }
+}

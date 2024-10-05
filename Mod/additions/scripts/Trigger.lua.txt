@@ -1,0 +1,156 @@
+local xiuweimax = {5,20,480,900,1400,3200}
+--85筑基  260金丹  600元婴   1100化神   2900练虚   4200大乘
+local power = 1     --xiuweimax[power]
+local xiuwei = "<size=144%><sprite name=xiuwei></size>"
+--普通（common）
+--稀有（rare）
+--史诗（epic）
+--传奇（legendary）
+--------------------------------------
+MOD_MANAGER:AddMod(function(Api)
+
+    Api:CopyCharacter("", {
+        id = "taffy",
+        display_name = "仙人·塔菲",
+        short_description = "塔菲不唐喵，不唐，塔菲不唐喵~",
+		icon = DCEI.Texture("taffy"),
+        icon_low_resolution = DCEI.Texture("taffy_s"), 
+        icon_high_resolution = DCEI.Texture("taffy_l"), 
+		unit = DCEI.Unit("COMBAT Unit First Mod Character"),
+		attack_ids = {
+			"bangbang",
+			"bangbang",
+			"bangbang",
+        },
+		
+		attributes = {
+			health_per_second= 22,
+			health_maximum= 2222,
+		},
+		
+		perks = {
+		},
+		perk_chains = {
+			"bangbang"
+		
+		}
+		
+
+		
+        relics = {
+            "qi",
+        },
+    })
+---------------------------------------------
+    Api:RegisterMissile("bangbang", {
+        id = "bangbang",
+        display_name = "22~66随机伤害",
+		flavor_text = "糖砸到小伤,棍子戳到就死了",
+        icon= DCEI.Texture("bangbang"),
+        missile = DCEI.SimpleUnit("bangbang"),
+        damage = function(attack_data, caster)
+            return math.random(22,66)
+        end,
+    })
+
+
+	
+----------------
+    Api:RegisterRelic("qi", {
+        id = "qi",
+        display_name = "糖能量（炼气期）",
+        description = "增加1防御力和攻击力。  每次攻击敌人临时 1回血和修炼进度",
+		flavor_text = "塔菲会修仙喵，塔菲不是飞舞喵",
+        icon = DCEI.Texture("qi"),
+        rarity = "permanent",
+		modify_attributes = {
+			attack = 1,
+			block = 1,
+		}
+    }, function(combat_unit)
+        local name = "my_power_cookie"
+        combat_unit.Attack:RegisterOnMissileHitCallback(name, function(level, attack_data, caster, target)
+            for i = 1, level do    --临时加
+                combat_unit:ModifyAttribute("health_per_second", 1, false)
+				combat_unit:ModifyAttribute("xiuwei", 1, false)
+				
+               
+            end
+			combat_unit.run_instance:ModifySavedPerkDataAttributes("xiuwei", 1)  --永久加
+			
+        end)
+        combat_unit.Attack:RegisterOnMissileImpactCallback(name, function(level, attack_data, caster, target)
+            local old_xiuwei = caster:GetBoundedAttribute("xiuwei")
+            local new_xiuwei = old_xiuwei + 1
+
+            if new_xiuwei >= xiuweimax[power] then
+                new_xiuwei = 0
+				combat_unit:ModifyAttribute("xiuwei", -xiuweimax[power]+1, false)
+
+				combat_unit.run_instance:ModifySavedPerkDataAttributes("xiuwei", -xiuweimax[power]+1) 
+
+				power=power+1
+                -- 加弹药
+                local deck_size = #caster.Attack:GetEmojiDeck()
+                for i = 1, level do
+                    caster.run_instance:ModifySavedPerkDataEmojis("bangbang", deck_size + i)
+                end
+                -- Add emojis to the combat deck (not persisted).
+                caster.Attack:AddEmojiToDeck("bangbang", level)
+                caster:PlayAwardEmojiAnimation("bangbang", level)
+
+
+            end
+
+            caster:ModifyAttribute("custom_attribute_rock_quest", new_xiuwei - old_xiuwei)
+            caster.run_instance:SetSavedPerkDataAttributes("custom_attribute_rock_quest", new_xiuwei)
+        end)
+    end)
+----------------------
+	
+    Api:RegisterPerk("bangbang", {
+        id = "bangbang",
+        display_name = "棒棒糖",
+		perk_type = "perk",
+        description = "获得一根棒棒糖(*^▽^*)",
+        icon = DCEI.Texture("bangbang"),
+        --perk_type = "missile",
+        rarity = "rare",
+        attacks = {
+            bangbang = 1,
+        },
+    })
+--------------------------
+    Api:RegisterPerk("bangbang", {
+        id = "bangbang",
+        display_name = "我不唐！",
+		perk_type = "perk",
+        description = "每有1个emoji获得120",
+        icon = DCEI.Texture("bangbang"),
+        --perk_type = "missile",
+        rarity = "rare",
+        attacks = {
+            bangbang = 1,
+        },
+    })
+--------------------------
+
+    Api:RegisterAttribute({
+        id = "xiuwei",
+        display_name = "修炼进度",
+        description = xiuweimax[1].."筑基  "..xiuweimax[2].."金丹   " ..xiuweimax[3].. "元婴    "..xiuweimax[4].."化神    "..xiuweimax[5].."练虚    "..xiuweimax[6].."大乘   ",
+        icon = DCEI.Texture("xiuwei"),
+        display_type = Api.DisplayType.Integer,
+        is_neutral = true, -- if true, font color will always be white
+        flavor_text = "好！练！",
+        display_requirements = {
+            is_hero = true, -- only show for hero
+            perk = "custom_perk_rock_quest", -- only show if has this perk
+            default_value = 0,
+            max = xiuweimax[power] -- 最大值
+        },
+		
+		
+    })
+
+end)

@@ -1,0 +1,23 @@
+{
+    "actors": {
+        "bangbang": {
+			"parent": "_COMBAT Missile Simple",
+            "unitActor": {
+                "resource": {
+                    "name": "bangbang"
+                },
+                "modelScale": 1
+            }
+        },
+        "COMBAT Unit First Mod Character" : {
+            "parent": "_COMBAT Unit Mob",
+            "unitActor": {
+                "resource": {
+                    "name": "my_character_large"
+                },
+                "modelScale": 0.5
+            }
+
+        }
+    }
+}
